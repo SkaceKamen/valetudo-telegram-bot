@@ -53,23 +53,29 @@ func (bot *Bot) listenToStateChanges() error {
 		return err
 	}
 
-	bot.robotApi.ListenToStateChanges(func(state *valetudo.RobotState) {
-		parsed := stateObjToData(state)
+	for {
+		log.Println("Listening for state changes...")
 
-		log.Println("Received state, status: ", parsed.Status, " batteryStatus:", parsed.BatteryStatus, " batteryLevel:", parsed.BatteryLevel)
+		err = bot.robotApi.ListenToStateChanges(func(state *valetudo.RobotState) {
+			parsed := stateObjToData(state)
 
-		if lastState.BatteryStatus != parsed.BatteryStatus {
-			bot.handleBatteryStatusChange(lastState, parsed)
+			log.Println("Received state, status: ", parsed.Status, " batteryStatus:", parsed.BatteryStatus, " batteryLevel:", parsed.BatteryLevel)
+
+			if lastState.BatteryStatus != parsed.BatteryStatus {
+				bot.handleBatteryStatusChange(lastState, parsed)
+			}
+
+			if lastState.Status != parsed.Status {
+				bot.handleStatusChange(lastState, parsed)
+			}
+
+			lastState = parsed
+		})
+
+		if err != nil {
+			log.Println(err)
 		}
-
-		if lastState.Status != parsed.Status {
-			bot.handleStatusChange(lastState, parsed)
-		}
-
-		lastState = parsed
-	})
-
-	return nil
+	}
 }
 
 func (bot *Bot) handleStatusChange(previous *CurrentState, new *CurrentState) {

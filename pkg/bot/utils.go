@@ -39,7 +39,7 @@ func (bot *Bot) getRooms() (*[]valetudo.RobotStateMapLayer, error) {
 	result := []valetudo.RobotStateMapLayer{}
 
 	for _, layer := range state.Map.Layers {
-		if layer.Type == "segment" {
+		if layer.Type == "segment" && layer.Metadata.Name != nil && layer.Metadata.Active != nil && *layer.Metadata.Active {
 			result = append(result, layer)
 		}
 	}
