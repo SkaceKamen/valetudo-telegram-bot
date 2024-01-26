@@ -54,3 +54,44 @@ func robotStatusEmoji(robotStatus string) string {
 
 	return "🤖"
 }
+
+func localizeOperationMode(mode string) string {
+	switch mode {
+	case "vacuum":
+		return "Vacuum"
+	case "mop":
+		return "Mop"
+	case "vacuum_and_mop":
+		return "Vacuum and mop"
+	}
+
+	return mode
+}
+
+func localizeFanSpeed(speed string) string {
+	switch speed {
+	case "low":
+		return "Low"
+	case "medium":
+		return "Medium"
+	case "high":
+		return "High"
+	case "max":
+		return "Max"
+	}
+
+	return speed
+}
+
+func localizeWaterGrade(usage string) string {
+	switch usage {
+	case "low":
+		return "Low"
+	case "medium":
+		return "Medium"
+	case "high":
+		return "High"
+	}
+
+	return usage
+}

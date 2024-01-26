@@ -142,7 +142,7 @@ func (bot *Bot) handleStatusCommand(requesterId int64, args string) error {
 
 	stateString := ""
 	stateString += fmt.Sprintf(
-		"%s\n🔋 Battery: %d%% (%s)",
+		"%s\n🔋 *Battery:* %d%% \\(%s\\)",
 		statusString,
 		state.BatteryLevel,
 		state.BatteryStatus,
@@ -155,7 +155,19 @@ func (bot *Bot) handleStatusCommand(requesterId int64, args string) error {
 			localizedAttachments = append(localizedAttachments, localizeAttachmentType(attachment))
 		}
 
-		stateString += "\n⚙️ Attachments: " + strings.Join(localizedAttachments, ", ")
+		stateString += "\n⚙️ *Attachments:* " + strings.Join(localizedAttachments, ", ")
+	}
+
+	if state.OperationMode != "" {
+		stateString += "\n🔧 *Mode:* " + localizeOperationMode(state.OperationMode)
+	}
+
+	if state.FanSpeed != "" {
+		stateString += "\n🌀 *Fan speed:* " + localizeFanSpeed(state.FanSpeed)
+	}
+
+	if state.WaterGrade != "" {
+		stateString += "\n💧 *Water grade:* " + localizeWaterGrade(state.WaterGrade)
 	}
 
 	keyboard := tgbotapi.NewInlineKeyboardRow(
@@ -196,6 +208,7 @@ func (bot *Bot) handleStatusCommand(requesterId int64, args string) error {
 	})
 
 	mapMsg.Caption = stateString
+	mapMsg.ParseMode = "MarkdownV2"
 	mapMsg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(keyboard)
 
 	_, err = bot.telegramApi.Send(mapMsg)

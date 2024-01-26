@@ -14,6 +14,9 @@ type CurrentState struct {
 	BatteryStatus       string
 	BatteryLevel        int
 	Status              string
+	WaterGrade          string
+	OperationMode       string
+	FanSpeed            string
 	Attachments         []CurrentStateAttachmentState
 	AttachedAttachments []string
 }
@@ -74,6 +77,22 @@ func stateObjToData(state *[]valetudo.RobotStateAttribute) *CurrentState {
 
 				if *attribute.Attached {
 					result.AttachedAttachments = append(result.AttachedAttachments, *attribute.Type)
+				}
+			}
+		}
+
+		if attribute.Class == "PresetSelectionStateAttribute" {
+			if attribute.Type != nil && attribute.Value != nil {
+				if *attribute.Type == "water_grade" {
+					result.WaterGrade = *attribute.Value
+				}
+
+				if *attribute.Type == "operation_mode" {
+					result.OperationMode = *attribute.Value
+				}
+
+				if *attribute.Type == "fan_speed" {
+					result.FanSpeed = *attribute.Value
 				}
 			}
 		}
