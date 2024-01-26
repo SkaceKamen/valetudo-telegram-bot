@@ -20,10 +20,18 @@ type BotConfig struct {
 	TelegramDebug    bool
 }
 
+func parseTelegramChatIds(chatIds string) []string {
+	if chatIds == "" {
+		return []string{}
+	}
+
+	return strings.Split(chatIds, ",")
+}
+
 func loadConfig() *BotConfig {
 	return &BotConfig{
 		TelegramBotToken: os.Getenv("TELEGRAM_BOT_TOKEN"),
-		TelegramChatIds:  strings.Split(os.Getenv("TELEGRAM_CHAT_IDS"), ","),
+		TelegramChatIds:  parseTelegramChatIds(os.Getenv("TELEGRAM_CHAT_IDS")),
 		TelegramDebug:    os.Getenv("TELEGRAM_DEBUG") == "true",
 		ValetudoUrl:      os.Getenv("VALETUDO_URL"),
 	}

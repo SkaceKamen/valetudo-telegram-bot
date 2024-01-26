@@ -30,6 +30,17 @@ func ParseRobotState(body []byte) (*RobotState, error) {
 	return &state, nil
 }
 
+func ParseRobotStateAttributes(body []byte) (*[]RobotStateAttribute, error) {
+	result := []RobotStateAttribute{}
+
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 func (client *ValetudoClient) PushRequest(method string, url string, data interface{}) error {
 	requestBytes, err := json.Marshal(data)
 	if err != nil {
@@ -82,6 +93,24 @@ func (client *ValetudoClient) GetRobotState() (*RobotState, error) {
 	return ParseRobotState(body)
 }
 
+func (client *ValetudoClient) GetRobotStateAttributes() (*[]RobotStateAttribute, error) {
+	res, err := http.Get(client.Url + "/api/v2/robot/state/attributes")
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ParseRobotStateAttributes(body)
+}
+
 func (client *ValetudoClient) Start() error {
 	err := client.PushRequest("PUT", "/api/v2/robot/capabilities/BasicControlCapability", BasicControlCapabilityRequest{
 		Action: "start",
@@ -125,18 +154,33 @@ func (client *ValetudoClient) CleanMapSegments(segmentIds []string, iterations i
 	return err
 }
 
-func (client *ValetudoClient) ListenToStateChanges(callback func(*RobotState)) error {
+func (client *ValetudoClient) ListenToStateChanges(callback func(*RobotState, error)) error {
 	sseClient := sse.NewClient(client.Url + "/api/v2/robot/state/sse")
 	sseClient.Subscribe("messages", func(msg *sse.Event) {
 		state, err := ParseRobotState(msg.Data)
 
 		if err != nil {
-			// TODO: Report something somewhere?
-			log.Println(err)
+			callback(nil, err)
 			return
 		}
 
-		callback(state)
+		callback(state, nil)
+	})
+
+	return nil
+}
+
+func (client *ValetudoClient) ListenToStateAttributesChanges(callback func(*[]RobotStateAttribute, error)) error {
+	sseClient := sse.NewClient(client.Url + "/api/v2/robot/state/attributes/sse")
+	sseClient.Subscribe("messages", func(msg *sse.Event) {
+		state, err := ParseRobotStateAttributes(msg.Data)
+
+		if err != nil {
+			callback(nil, err)
+			return
+		}
+
+		callback(state, nil)
 	})
 
 	return nil

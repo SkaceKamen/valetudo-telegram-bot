@@ -31,14 +31,6 @@ func (bot *Bot) publishMyCommands() error {
 				Command:     "status",
 				Description: "Get current status",
 			},
-			tgbotapi.BotCommand{
-				Command:     "stop_notifications",
-				Description: "Stop all notifications",
-			},
-			tgbotapi.BotCommand{
-				Command:     "notifications",
-				Description: "Notifications settings",
-			},
 		),
 	)
 
@@ -166,8 +158,6 @@ func (bot *Bot) handleStatusCommand(requesterId int64, args string) error {
 		stateString += "\n⚙️ Attachments: " + strings.Join(localizedAttachments, ", ")
 	}
 
-	msg := tgbotapi.NewMessage(requesterId, stateString)
-
 	keyboard := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("🧹 Start cleaning", "clean"),
 	)
@@ -194,9 +184,21 @@ func (bot *Bot) handleStatusCommand(requesterId int64, args string) error {
 		)
 	}
 
-	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(keyboard)
+	fullState, err := bot.robotApi.GetRobotState()
+	if err != nil {
+		return err
+	}
 
-	_, err = bot.telegramApi.Send(msg)
+	mapImage := renderMap(&fullState.Map)
+	mapMsg := tgbotapi.NewPhoto(requesterId, tgbotapi.FileBytes{
+		Name:  "map.png",
+		Bytes: mapImage,
+	})
+
+	mapMsg.Caption = stateString
+	mapMsg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(keyboard)
+
+	_, err = bot.telegramApi.Send(mapMsg)
 
 	if err != nil {
 		return err

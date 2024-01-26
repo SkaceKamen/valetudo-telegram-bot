@@ -18,13 +18,45 @@ type RobotStateAttribute struct {
 }
 
 type RobotStateMap struct {
-	PixelSize int                  `json:"pixelSize"`
-	Layers    []RobotStateMapLayer `json:"layers"`
+	Size      RobotStateMapSize     `json:"size"`
+	PixelSize int                   `json:"pixelSize"`
+	Layers    []RobotStateMapLayer  `json:"layers"`
+	Entities  []RobotStateMapEntity `json:"entities"`
+}
+
+type RobotStateMapEntity struct {
+	Class    string                      `json:"__class"`
+	Metadata RobotStateMapEntityMetadata `json:"metaData"`
+	Type     string                      `json:"type"`
+	Points   *[]int                      `json:"points,omitempty"`
+}
+
+type RobotStateMapEntityMetadata struct {
+	Angle *float64 `json:"angle,omitempty"`
+}
+
+type RobotStateMapSize struct {
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
 type RobotStateMapLayer struct {
-	Type     string                     `json:"type"`
-	Metadata RobotStateMapLayerMetadata `json:"metaData"`
+	Type             string                       `json:"type"`
+	Metadata         RobotStateMapLayerMetadata   `json:"metaData"`
+	Dimensions       RobotStateMapLayerDimensions `json:"dimensions"`
+	CompressedPixels []int                        `json:"compressedPixels"`
+}
+
+type RobotStateMapLayerDimensions struct {
+	X RobotStateMapDimensionData `json:"x"`
+	Y RobotStateMapDimensionData `json:"y"`
+}
+
+type RobotStateMapDimensionData struct {
+	Min int `json:"min"`
+	Max int `json:"max"`
+	Mid int `json:"mid"`
+	Avg int `json:"avg"`
 }
 
 type RobotStateMapLayerMetadata struct {

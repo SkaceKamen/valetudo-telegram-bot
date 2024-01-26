@@ -14,13 +14,12 @@ type CurrentState struct {
 	BatteryStatus       string
 	BatteryLevel        int
 	Status              string
-	Map                 valetudo.RobotStateMap
 	Attachments         []CurrentStateAttachmentState
 	AttachedAttachments []string
 }
 
 func (bot *Bot) getParsedState() (*CurrentState, error) {
-	robotState, err := bot.robotApi.GetRobotState()
+	robotState, err := bot.robotApi.GetRobotStateAttributes()
 
 	if err != nil {
 		return nil, err
@@ -47,10 +46,10 @@ func (bot *Bot) getRooms() (*[]valetudo.RobotStateMapLayer, error) {
 	return &result, nil
 }
 
-func stateObjToData(state *valetudo.RobotState) *CurrentState {
+func stateObjToData(state *[]valetudo.RobotStateAttribute) *CurrentState {
 	result := CurrentState{}
 
-	for _, attribute := range state.Attributes {
+	for _, attribute := range *state {
 		if attribute.Class == "BatteryStateAttribute" {
 			if attribute.Flag != nil {
 				result.BatteryStatus = *attribute.Flag
@@ -79,8 +78,6 @@ func stateObjToData(state *valetudo.RobotState) *CurrentState {
 			}
 		}
 	}
-
-	result.Map = state.Map
 
 	return &result
 }

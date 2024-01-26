@@ -56,7 +56,12 @@ func (bot *Bot) listenToStateChanges() error {
 	for {
 		log.Println("Listening for state changes...")
 
-		err = bot.robotApi.ListenToStateChanges(func(state *valetudo.RobotState) {
+		err = bot.robotApi.ListenToStateAttributesChanges(func(state *[]valetudo.RobotStateAttribute, err error) {
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
 			parsed := stateObjToData(state)
 
 			log.Println("Received state, status: ", parsed.Status, " batteryStatus:", parsed.BatteryStatus, " batteryLevel:", parsed.BatteryLevel)
@@ -206,6 +211,8 @@ func (bot *Bot) listenToMessages() error {
 		}
 
 		if !bot.isAllowedUserId(update.Message.From.ID) {
+			bot.Send(update.Message.From.ID, "⚠️ You're not allowed to access this bot. Your ID: "+fmt.Sprintf("%d", update.Message.From.ID))
+
 			continue
 		}
 
@@ -217,8 +224,7 @@ func (bot *Bot) listenToMessages() error {
 
 		switch update.Message.Command() {
 		case "start":
-			bot.chatIds = append(bot.chatIds, update.Message.Chat.ID)
-			bot.Send(update.Message.Chat.ID, "✔️ Subscribed to notifications")
+			bot.Send(update.CallbackQuery.Message.Chat.ID, "👋 I'm ready, /status or /clean")
 		case "status":
 			err := bot.handleStatusCommand(update.Message.Chat.ID, update.Message.CommandArguments())
 			if err != nil {
