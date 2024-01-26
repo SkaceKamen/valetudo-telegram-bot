@@ -1,6 +1,4 @@
-FROM golang:1.21-alpine as build-server
-
-RUN apk add build-base
+FROM golang:1.21-bullseye as build-server
 
 # Initialization
 RUN mkdir -p /app
@@ -15,7 +13,7 @@ RUN go mod download
 COPY cmd ./cmd
 COPY pkg ./pkg
 
-RUN GOOS=linux GOARCH=amd64 go build -o valetudo-telegram-bot ./cmd/valetudo-telegram-bot/main.go
+RUN go build -o valetudo-telegram-bot ./cmd/valetudo-telegram-bot/main.go
 
 FROM debian:bullseye-slim
 
@@ -27,6 +25,9 @@ ENV TELEGRAM_DEBUG false
 
 # Copy build results
 WORKDIR /app
+
+RUN apt update
+RUN apt install ca-certificates -y
 
 COPY --from=build-server /app/valetudo-telegram-bot ./valetudo-telegram-bot
 
