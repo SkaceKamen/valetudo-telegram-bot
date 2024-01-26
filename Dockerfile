@@ -26,6 +26,7 @@ ENV TELEGRAM_DEBUG false
 # Copy build results
 WORKDIR /app
 
+# This has to be done to be able to use https
 RUN apt update
 RUN apt install ca-certificates -y
 

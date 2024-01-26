@@ -27,7 +27,6 @@ func (bot *Bot) Start() error {
 	err := bot.publishMyCommands()
 
 	if err != nil {
-		// TODO: Custom error
 		return err
 	}
 
@@ -215,8 +214,6 @@ func (bot *Bot) listenToMessages() error {
 
 			continue
 		}
-
-		// log.Printf("[%d] %s", update.Message.Chat.ID, update.Message.Text)
 
 		if !update.Message.IsCommand() {
 			continue

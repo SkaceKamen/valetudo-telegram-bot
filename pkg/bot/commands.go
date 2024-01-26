@@ -142,7 +142,7 @@ func (bot *Bot) handleStatusCommand(requesterId int64, args string) error {
 
 	stateString := ""
 	stateString += fmt.Sprintf(
-		"🤖 Status: %s\n🔋 Battery: %d%% (%s)",
+		"%s\n🔋 Battery: %d%% (%s)",
 		statusString,
 		state.BatteryLevel,
 		state.BatteryStatus,
@@ -151,8 +151,8 @@ func (bot *Bot) handleStatusCommand(requesterId int64, args string) error {
 	if len(state.AttachedAttachments) > 0 {
 		localizedAttachments := []string{}
 
-		for _, attachment := range state.Attachments {
-			localizedAttachments = append(localizedAttachments, localizeAttachmentType(attachment.Type))
+		for _, attachment := range state.AttachedAttachments {
+			localizedAttachments = append(localizedAttachments, localizeAttachmentType(attachment))
 		}
 
 		stateString += "\n⚙️ Attachments: " + strings.Join(localizedAttachments, ", ")
