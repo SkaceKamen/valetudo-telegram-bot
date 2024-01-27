@@ -64,9 +64,8 @@ jobs:
           result-encoding: string
           script: |
             const tag = 'v' + (
-              new Date().toISOString().slice(0, 19)
-                .replace('-', '')
-                .replace(':', '')
+              new Date().toISOString().slice(0, 16)
+                .replace(/[-:]/g, '')
                 .replace('T', '.')
             )
 
