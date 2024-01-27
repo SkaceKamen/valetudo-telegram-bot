@@ -1,4 +1,5 @@
-FROM golang:1.21-bullseye as build-server
+ARG ARCH=
+FROM ${ARCH}golang:1.21-bullseye as build-server
 
 # Initialization
 RUN mkdir -p /app
@@ -15,7 +16,7 @@ COPY pkg ./pkg
 
 RUN go build -o valetudo-telegram-bot ./cmd/valetudo-telegram-bot/main.go
 
-FROM debian:bullseye-slim
+FROM ${ARCH}debian:bullseye-slim
 
 # Options
 ENV TELEGRAM_BOT_TOKEN ""
