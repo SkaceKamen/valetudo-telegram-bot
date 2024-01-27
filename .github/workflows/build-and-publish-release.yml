@@ -13,7 +13,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        architecture: [amd64, arm64, arm]
+        build: [
+          { os: linux, arch: amd64, suffix: '' },
+          { os: linux, arch: arm64, suffix: '' },
+          { os: linux, arch: arm, suffix: '' },
+          { os: linux, arch: '386', suffix: '' },
+          { os: darwin, arch: amd64, suffix: '' },
+          { os: darwin, arch: arm64, suffix: '' },
+          { os: windows, arch: amd64, suffix: '.exe' },
+          { os: windows, arch: '386', suffix: '.exe' }
+        ]
+        
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -24,16 +34,16 @@ jobs:
         go-version: '1.21'
 
     - name: Build
-      run: env GOOS=linux GOARCH=${{ matrix.architecture }} go build -o valetudo-telegram-bot ./cmd/valetudo-telegram-bot/main.go
+      run: env GOOS=${{ matrix.build.os }} GOARCH=${{ matrix.build.arch }} go build -o valetudo-telegram-bot${{ matrix.build.suffix }} ./cmd/valetudo-telegram-bot/main.go
 
     - name: Create release archive
-      run: tar -czf valetudo-telegram-bot-${{ matrix.architecture }}.tar.gz valetudo-telegram-bot
+      run: tar -czf valetudo-telegram-bot-${{ matrix.build.os }}-${{ matrix.build.arch }}.tar.gz valetudo-telegram-bot${{ matrix.build.suffix }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: valetudo-telegram-bot-${{ matrix.architecture }}
-        path: valetudo-telegram-bot-${{ matrix.architecture }}.tar.gz
+        name: valetudo-telegram-bot-${{ matrix.build.os }}-${{ matrix.build.arch }}
+        path: valetudo-telegram-bot-${{ matrix.build.os }}-${{ matrix.build.arch }}.tar.gz
 
   release:
     name: Release
