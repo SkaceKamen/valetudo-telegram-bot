@@ -5,10 +5,25 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"sort"
 
 	"github.com/SkaceKamen/valetudo-telegram-bot/pkg/valetudo"
 	"github.com/fogleman/gg"
 )
+
+func getLayerOrder(layer valetudo.RobotStateMapLayer) int {
+	if layer.Type == "wall" {
+		return 3
+	}
+	if layer.Type == "floor" {
+		return 2
+	}
+	if layer.Type == "segment" {
+		return 1
+	}
+
+	return 0
+}
 
 func renderMap(mapData *valetudo.RobotStateMap) []byte {
 	w := int(math.Round(float64(mapData.Size.X) / float64(mapData.PixelSize)))
@@ -46,6 +61,13 @@ func renderMap(mapData *valetudo.RobotStateMap) []byte {
 	resizedH := maxY - minY
 
 	ctx := gg.NewContext(resizedW, resizedH)
+
+	sort.Slice(mapData.Layers, func(i, j int) bool {
+		orderA := getLayerOrder(mapData.Layers[i])
+		orderB := getLayerOrder(mapData.Layers[j])
+
+		return orderA < orderB
+	})
 
 	for _, layer := range mapData.Layers {
 		if layer.Type == "wall" {

@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"fmt"
+
 	"github.com/SkaceKamen/valetudo-telegram-bot/pkg/valetudo"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -40,11 +42,16 @@ func (bot *Bot) getRooms() (*[]valetudo.RobotStateMapLayer, error) {
 
 	result := []valetudo.RobotStateMapLayer{}
 
+	fmt.Println("State has", len(state.Map.Layers), "layers")
+
 	for _, layer := range state.Map.Layers {
-		if layer.Type == "segment" && layer.Metadata.Name != nil && layer.Metadata.Active != nil && *layer.Metadata.Active {
+		fmt.Println("Layer", layer.Type, layer.Metadata.Name, layer.Metadata.Active)
+		if layer.Type == "segment" && layer.Metadata.Name != nil {
 			result = append(result, layer)
 		}
 	}
+
+	fmt.Println("Result has", len(result), "layers")
 
 	return &result, nil
 }
