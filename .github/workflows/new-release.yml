@@ -9,5 +9,8 @@ on:
 jobs:
   build-and-push-docker-image:
     uses: ./.github/workflows/build-and-push-docker-image.yml
+    secrets: inherit
   build-and-publish-release:
     uses: ./.github/workflows/build-and-publish-release.yml
+    permissions: write-all
+    secrets: inherit
