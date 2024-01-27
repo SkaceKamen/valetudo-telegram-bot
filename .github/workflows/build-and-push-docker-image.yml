@@ -3,11 +3,8 @@ concurrency:
   cancel-in-progress: true
   group: build-docker-and-push
 
-#on:
-#  push:
-#    branches: main
-
 on:
+  workflow_call:
   workflow_dispatch:
 
 jobs:

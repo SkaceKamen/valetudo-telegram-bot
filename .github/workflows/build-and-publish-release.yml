@@ -4,8 +4,8 @@ concurrency:
   group: build-and-release
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   build:
