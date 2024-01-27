@@ -13,6 +13,7 @@ RUN go mod download
 
 COPY cmd ./cmd
 COPY pkg ./pkg
+COPY assets ./assets
 
 RUN go build -o valetudo-telegram-bot ./cmd/valetudo-telegram-bot/main.go
 
