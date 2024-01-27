@@ -63,7 +63,12 @@ jobs:
         with:
           result-encoding: string
           script: |
-            const tag = Math.round(Date.now()/1000)
+            const tag = 'v' + (
+              new Date().toISOString().slice(0, 19)
+                .replace('-', '')
+                .replace(':', '')
+                .replace('T', '.')
+            )
 
             github.rest.git.createRef({
               owner: context.repo.owner,
