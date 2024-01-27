@@ -36,14 +36,17 @@ jobs:
     - name: Build
       run: env GOOS=${{ matrix.build.os }} GOARCH=${{ matrix.build.arch }} go build -o valetudo-telegram-bot${{ matrix.build.suffix }} ./cmd/valetudo-telegram-bot/main.go
 
-    - name: Create release archive
+    - name: Create release .tar.gz archive
       run: tar -czf valetudo-telegram-bot-${{ matrix.build.os }}-${{ matrix.build.arch }}.tar.gz valetudo-telegram-bot${{ matrix.build.suffix }}
+
+    - name: Create release .zip archive
+      run: zip valetudo-telegram-bot-${{ matrix.build.os }}-${{ matrix.build.arch }}.zip valetudo-telegram-bot${{ matrix.build.suffix }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: valetudo-telegram-bot-${{ matrix.build.os }}-${{ matrix.build.arch }}
-        path: valetudo-telegram-bot-${{ matrix.build.os }}-${{ matrix.build.arch }}.tar.gz
+        path: valetudo-telegram-bot-${{ matrix.build.os }}-${{ matrix.build.arch }}.*
 
   release:
     name: Release
