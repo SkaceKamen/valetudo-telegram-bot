@@ -22,7 +22,7 @@ Download latest release for your target platform, then copy `.env.example` from 
 
 #### Using docker
 
-The image is `skacekamen/valetudo-telegram-bot`, it should supports ARM64, ARM64 and ARM. The configuration is provided by environment variables.
+The image is [skacekamen/valetudo-telegram-bot](https://hub.docker.com/repository/docker/skacekamen/valetudo-telegram-bot/general), it should supports ARM64, ARM64 and ARM. The configuration is provided by environment variables.
 
 ```
 services:
