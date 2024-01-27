@@ -3,13 +3,18 @@ package bot
 import (
 	"bytes"
 	"fmt"
+	"image"
 	"image/color"
 	"math"
 	"sort"
 
+	"github.com/SkaceKamen/valetudo-telegram-bot/assets"
 	"github.com/SkaceKamen/valetudo-telegram-bot/pkg/valetudo"
 	"github.com/fogleman/gg"
 )
+
+var vacuumImage *image.Image
+var chargerImage *image.Image
 
 func getLayerOrder(layer valetudo.RobotStateMapLayer) int {
 	if layer.Type == "wall" {
@@ -25,7 +30,38 @@ func getLayerOrder(layer valetudo.RobotStateMapLayer) int {
 	return 0
 }
 
+func getEntityOrder(entity valetudo.RobotStateMapEntity) int {
+	if entity.Type == "charger_location" {
+		return 1
+	}
+	if entity.Type == "robot_position" {
+		return 2
+	}
+
+	return 3
+}
+
 func renderMap(mapData *valetudo.RobotStateMap) []byte {
+	fmt.Println("Rendering map...")
+
+	if vacuumImage == nil {
+		img, _, err := image.Decode(bytes.NewReader(assets.VacuumImage))
+		if err != nil {
+			panic(err)
+		}
+		vacuumImage = &img
+	}
+
+	if chargerImage == nil {
+		img, _, err := image.Decode(bytes.NewReader(assets.ChargerImage))
+		if err != nil {
+			panic(err)
+		}
+		chargerImage = &img
+	}
+
+	scale := 2.0
+
 	w := int(math.Round(float64(mapData.Size.X) / float64(mapData.PixelSize)))
 	h := int(math.Round(float64(mapData.Size.Y) / float64(mapData.PixelSize)))
 
@@ -57,8 +93,8 @@ func renderMap(mapData *valetudo.RobotStateMap) []byte {
 	maxX += int(float64(h) * 0.01)
 	maxY += int(float64(h) * 0.01)
 
-	resizedW := maxX - minX
-	resizedH := maxY - minY
+	resizedW := int(math.Round(float64(maxX-minX) * scale))
+	resizedH := int(math.Round(float64(maxY-minY) * scale))
 
 	ctx := gg.NewContext(resizedW, resizedH)
 
@@ -71,13 +107,13 @@ func renderMap(mapData *valetudo.RobotStateMap) []byte {
 
 	for _, layer := range mapData.Layers {
 		if layer.Type == "wall" {
-			renderLayer(ctx, layer, minX, minY, color.RGBA{0, 0, 0, 255})
+			renderLayer(ctx, layer, minX, minY, color.RGBA{0, 0, 0, 255}, scale)
 		}
 		if layer.Type == "floor" {
-			renderLayer(ctx, layer, minX, minY, color.RGBA{200, 200, 200, 255})
+			renderLayer(ctx, layer, minX, minY, color.RGBA{200, 200, 200, 255}, scale)
 		}
 		if layer.Type == "segment" {
-			renderLayer(ctx, layer, minX, minY, color.RGBA{128, 128, 128, 255})
+			renderLayer(ctx, layer, minX, minY, color.RGBA{128, 128, 128, 255}, scale)
 		}
 
 		if layer.Dimensions.X.Min < minX {
@@ -97,29 +133,46 @@ func renderMap(mapData *valetudo.RobotStateMap) []byte {
 		}
 	}
 
+	sort.Slice(mapData.Entities, func(i, j int) bool {
+		orderA := getEntityOrder(mapData.Entities[i])
+		orderB := getEntityOrder(mapData.Entities[j])
+
+		return orderA < orderB
+	})
+
 	for _, entity := range mapData.Entities {
 		fmt.Println(entity.Type, "at", float64((*entity.Points)[0]-minX)/float64(mapData.PixelSize), ",", float64((*entity.Points)[1]-minY)/float64(mapData.PixelSize))
 
+		x := ((float64((*entity.Points)[0]) / float64(mapData.PixelSize)) - float64(minX)) * scale
+		y := ((float64((*entity.Points)[1]) / float64(mapData.PixelSize)) - float64(minY)) * scale
+
 		if entity.Type == "charger_location" {
-			ctx.SetColor(color.RGBA{0, 255, 0, 255})
-			ctx.DrawCircle((float64((*entity.Points)[0])/float64(mapData.PixelSize))-float64(minX), (float64((*entity.Points)[1])/float64(mapData.PixelSize))-float64(minY), 5)
-			ctx.Fill()
+			ctx.DrawImageAnchored(*chargerImage, int(x), int(y), 0.5, 0.5)
 		}
 
 		if entity.Type == "robot_position" {
-			ctx.SetColor(color.RGBA{0, 0, 255, 255})
-			ctx.DrawCircle((float64((*entity.Points)[0])/float64(mapData.PixelSize))-float64(minX), (float64((*entity.Points)[1])/float64(mapData.PixelSize))-float64(minY), 10)
-			ctx.Fill()
+			ctx.Push()
+
+			if entity.Metadata.Angle != nil {
+				ctx.RotateAbout(gg.Degrees(float64(*entity.Metadata.Angle)), x, y)
+			}
+
+			ctx.DrawImageAnchored(*vacuumImage, int(x), int(y), 0.5, 0.5)
+			ctx.Pop()
 		}
 	}
 
+	ctx.Scale(3, 3)
+	ctx.Stroke()
+
 	buffer := bytes.Buffer{}
 	ctx.EncodePNG(&buffer)
+	ctx.SavePNG("map.png")
 
 	return buffer.Bytes()
 }
 
-func renderLayer(ctx *gg.Context, layer valetudo.RobotStateMapLayer, xOffset int, yOffset int, color color.Color) {
+func renderLayer(ctx *gg.Context, layer valetudo.RobotStateMapLayer, xOffset int, yOffset int, color color.Color, scale float64) {
 	ctx.SetColor(color)
 
 	for i := 0; i < len(layer.CompressedPixels); i += 3 {
@@ -128,7 +181,9 @@ func renderLayer(ctx *gg.Context, layer valetudo.RobotStateMapLayer, xOffset int
 		count := layer.CompressedPixels[i+2]
 		for j := 0; j < count; j++ {
 			x := xStart + j
-			ctx.SetPixel(x-xOffset, y-yOffset)
+			// ctx.SetPixel(int(float64(x-xOffset)*scale), int(float64(y-yOffset)*scale))
+			ctx.DrawRectangle(float64(x-xOffset)*scale, float64(y-yOffset)*scale, scale, scale)
+			ctx.Fill()
 		}
 	}
 }
