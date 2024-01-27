@@ -16,7 +16,7 @@ jobs:
         architecture: [amd64, arm64, arm]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v4
@@ -42,6 +42,16 @@ jobs:
         with:
           path: builds
           pattern: valetudo-telegram-bot-*
+      - name: Create random tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/' + Math.round(Date.now()/1000),
+              sha: context.sha
+            })
       - name: Publish release
         uses: softprops/action-gh-release@v1
         with:
