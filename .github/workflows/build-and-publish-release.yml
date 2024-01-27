@@ -50,10 +50,11 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/' + Math.round(Date.now()/1000),
+              ref: 'refs/tags/' + context.sha,
               sha: context.sha
             })
       - name: Publish release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.sha }}
           files: builds/*
