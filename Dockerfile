@@ -28,6 +28,7 @@ ENV TELEGRAM_DEBUG false
 WORKDIR /app
 
 # This has to be done to be able to use https
+ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update
 RUN apt install ca-certificates -y
 
