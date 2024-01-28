@@ -34,11 +34,7 @@ func (bot *Bot) publishMyCommands() error {
 		),
 	)
 
-	if err != nil {
-		fmt.Println("Failed to set my commands:", err)
-	}
-
-	return err
+	return fmt.Errorf("failed to set my commands: %w", err)
 }
 
 func (bot *Bot) handleCleanCommand(requesterId int64, args string) error {

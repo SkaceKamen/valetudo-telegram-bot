@@ -41,12 +41,20 @@ func main() {
 	godotenv.Load(".env")
 	config := loadConfig()
 
+	if config.TelegramBotToken == "" {
+		log.Panic("TELEGRAM_BOT_TOKEN is not set")
+	}
+
+	if config.ValetudoUrl == "" {
+		log.Panic("VALETUDO_URL is not set")
+	}
+
 	log.Println("Starting Valetudo Telegram Bot")
 
 	api := valetudo.Init(config.ValetudoUrl)
 	telegramBot, err := tgbotapi.NewBotAPI(config.TelegramBotToken)
 	if err != nil {
-		log.Panic(err)
+		log.Panic(fmt.Errorf("failed to initialize telegram integration, have you set your bot token? %w", err))
 	}
 
 	telegramBot.Debug = config.TelegramDebug

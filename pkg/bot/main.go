@@ -33,13 +33,13 @@ func (bot *Bot) Start() error {
 	go func() {
 		err = bot.listenToStateChanges()
 		if err != nil {
-			log.Println(err)
+			log.Println(fmt.Errorf("failed to listen to state changes: %w", err))
 		}
 	}()
 
 	err = bot.listenToMessages()
 	if err != nil {
-		return err
+		return fmt.Errorf("listening for new messages failed: %w", err)
 	}
 
 	return nil

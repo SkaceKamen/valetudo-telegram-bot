@@ -2,7 +2,6 @@ package bot
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -42,8 +41,6 @@ func getEntityOrder(entity valetudo.RobotStateMapEntity) int {
 }
 
 func renderMap(mapData *valetudo.RobotStateMap) []byte {
-	fmt.Println("Rendering map...")
-
 	if vacuumImage == nil {
 		img, _, err := image.Decode(bytes.NewReader(assets.VacuumImage))
 		if err != nil {
@@ -141,8 +138,6 @@ func renderMap(mapData *valetudo.RobotStateMap) []byte {
 	})
 
 	for _, entity := range mapData.Entities {
-		fmt.Println(entity.Type, "at", float64((*entity.Points)[0]-minX)/float64(mapData.PixelSize), ",", float64((*entity.Points)[1]-minY)/float64(mapData.PixelSize))
-
 		x := ((float64((*entity.Points)[0]) / float64(mapData.PixelSize)) - float64(minX)) * scale
 		y := ((float64((*entity.Points)[1]) / float64(mapData.PixelSize)) - float64(minY)) * scale
 
@@ -167,7 +162,6 @@ func renderMap(mapData *valetudo.RobotStateMap) []byte {
 
 	buffer := bytes.Buffer{}
 	ctx.EncodePNG(&buffer)
-	ctx.SavePNG("map.png")
 
 	return buffer.Bytes()
 }
