@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/SkaceKamen/valetudo-telegram-bot/pkg/valetudo"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -16,6 +18,9 @@ type Bot struct {
 
 	/** capabilities supported by the robot */
 	capabilities []string
+
+	statusMessageMutex sync.Mutex
+	statusMessageTimer *time.Timer
 }
 
 func NewBot(robotApi *valetudo.ValetudoClient, telegramApi *tgbotapi.BotAPI) Bot {
@@ -107,7 +112,18 @@ func (bot *Bot) handleStatusChange(previous *CurrentState, new *CurrentState) {
 			}
 		}
 
-		bot.Send(user, statusMessage)
+		bot.statusMessageMutex.Lock()
+		defer bot.statusMessageMutex.Unlock()
+
+		if bot.statusMessageTimer != nil {
+			bot.statusMessageTimer.Stop()
+		}
+
+		sendStatus := func() {
+			bot.Send(user, statusMessage)
+		}
+
+		bot.statusMessageTimer = time.AfterFunc(1*time.Second, sendStatus)
 	}
 }
 
