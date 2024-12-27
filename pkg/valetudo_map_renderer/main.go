@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"math"
+	"math/rand"
 	"sort"
 
 	"github.com/SkaceKamen/valetudo-telegram-bot/assets"
@@ -124,6 +125,8 @@ func RenderMap(mapData *valetudo.RobotStateMap) []byte {
 		return orderA < orderB
 	})
 
+	var floorLayerIndex = 0
+
 	for _, layer := range mapData.Layers {
 		// Only continue with supported layers
 		if layer.Type != "wall" && layer.Type != "floor" && layer.Type != "segment" {
@@ -138,7 +141,10 @@ func RenderMap(mapData *valetudo.RobotStateMap) []byte {
 			layerColor = color.RGBA{200, 200, 200, 255}
 		}
 		if layer.Type == "segment" {
-			layerColor = color.RGBA{128, 128, 128, 255}
+			var randomColorGenerator = rand.New(rand.NewSource(int64(floorLayerIndex * 5)))
+			floorLayerIndex += 1
+
+			layerColor = color.RGBA{128, 128, uint8(100 + randomColorGenerator.Intn(155)), 255}
 		}
 
 		renderLayer(ctx, layer, minX, minY, layerColor, scale)
