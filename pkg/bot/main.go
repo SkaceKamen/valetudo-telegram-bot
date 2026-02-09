@@ -253,6 +253,28 @@ func (bot *Bot) listenToMessages() error {
 					continue
 				}
 
+				if data[1] == "clean_all" {
+					err := bot.robotApi.Start()
+
+					if err != nil {
+						bot.Send(update.CallbackQuery.Message.Chat.ID, "❌ Error starting cleaning: "+err.Error())
+						log.Println(err)
+					} else {
+						bot.telegramApi.Request(
+							tgbotapi.EditMessageTextConfig{
+								BaseEdit: tgbotapi.BaseEdit{
+									ChatID:      update.CallbackQuery.Message.Chat.ID,
+									MessageID:   update.CallbackQuery.Message.MessageID,
+									ReplyMarkup: nil,
+								},
+								Text: "🧹 Cleaning everything",
+							},
+						)
+					}
+
+					continue
+				}
+
 				err := bot.robotApi.CleanMapSegments([]string{data[1]}, 1)
 
 				if err != nil {
