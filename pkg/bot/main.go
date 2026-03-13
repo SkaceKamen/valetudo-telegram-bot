@@ -245,9 +245,26 @@ func (bot *Bot) listenToMessages() error {
 			case "clean":
 				if len(data) < 2 {
 					bot.handleCleanCommand(update.CallbackQuery.Message.Chat.ID, "")
-					callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "You need to pick what")
-					if _, err := bot.telegramApi.Request(callback); err != nil {
+					continue
+				}
+
+				if data[1] == "all" {
+					err := bot.robotApi.Start()
+
+					if err != nil {
+						bot.Send(update.CallbackQuery.Message.Chat.ID, "❌ Error starting cleaning: "+err.Error())
 						log.Println(err)
+					} else {
+						bot.telegramApi.Request(
+							tgbotapi.EditMessageTextConfig{
+								BaseEdit: tgbotapi.BaseEdit{
+									ChatID:      update.CallbackQuery.Message.Chat.ID,
+									MessageID:   update.CallbackQuery.Message.MessageID,
+									ReplyMarkup: nil,
+								},
+								Text: "🧹 Cleaning everything",
+							},
+						)
 					}
 
 					continue

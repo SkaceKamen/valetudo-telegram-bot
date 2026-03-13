@@ -135,7 +135,7 @@ func (bot *Bot) handleCleanCommand(requesterId int64, args string) error {
 	}
 
 	keyboardButtons := [][]tgbotapi.InlineKeyboardButton{
-		{tgbotapi.NewInlineKeyboardButtonData("💯 Everything", "clean_all")},
+		{tgbotapi.NewInlineKeyboardButtonData("💯 Everything", "clean all")},
 	}
 
 	sort.Slice(*rooms, func(i, j int) bool {
