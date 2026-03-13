@@ -245,11 +245,6 @@ func (bot *Bot) listenToMessages() error {
 			case "clean":
 				if len(data) < 2 {
 					bot.handleCleanCommand(update.CallbackQuery.Message.Chat.ID, "")
-					callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "You need to pick what")
-					if _, err := bot.telegramApi.Request(callback); err != nil {
-						log.Println(err)
-					}
-
 					continue
 				}
 
