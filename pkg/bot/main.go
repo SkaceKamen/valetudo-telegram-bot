@@ -253,7 +253,7 @@ func (bot *Bot) listenToMessages() error {
 					continue
 				}
 
-				if data[1] == "clean_all" {
+				if data[1] == "all" {
 					err := bot.robotApi.Start()
 
 					if err != nil {
